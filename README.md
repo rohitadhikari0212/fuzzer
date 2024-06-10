@@ -26,10 +26,10 @@ FUZZER empowers users with a powerful yet straightforward tool to enhance the se
 
 # To Install the tool 
 Run the command
-`git clone https://github.com/aexon2002/fuzzer.git`
-`cd fuzzer`
-`chmod +x fuzzer`
-`mv -rvf fuzzer /usr/bin`
+1. `git clone https://github.com/aexon2002/fuzzer.git`.
+2. `cd fuzzer`
+3. `chmod +x fuzzer`
+4. `mv -rvf fuzzer /usr/bin`
 
 
 # To use the tool
