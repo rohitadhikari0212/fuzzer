@@ -22,3 +22,15 @@ Usage:
 6. Run FUZZER: Execute the script to initiate the fuzzing process and analyze the results.
 
 FUZZER empowers users with a powerful yet straightforward tool to enhance the security posture of web applications by efficiently identifying and addressing potential vulnerabilities.
+
+
+# To Install the tool 
+Run the command
+`git clone https://github.com/aexon2002/fuzzer.git
+cd fuzzer
+chmod +x fuzzer
+mv -rvf fuzzer /usr/bin`
+
+
+# To use the tool
+Run the command `sudo fuzzer -u http://example.com -w wordlist`
