@@ -1,0 +1,188 @@
+#!/bin/bash
+
+# Default curl options
+curl_options="-sw '\n%{http_code} %{size_download} %{time_total}' -o /dev/null"
+
+# Function to display the help message
+display_help() {
+    echo -e "\033[1;35m+-------------------------------------------------------+\033[0m"
+    echo -e "\033[1;35m|                                                       |\033[0m"
+    echo -e "\033[1;35m|    \033[1;36m  ____  _     ____  _____  _____  _    _ _______ _____  \033[1;35m |\033[0m"
+    echo -e "\033[1;35m|   \033[1;36m|  __ \| |   / __ \|  __ \|  __ \| |  | |__   __/ ____| \033[1;35m|\033[0m"
+    echo -e "\033[1;35m|   \033[1;36m| |__) | |  | |  | | |__) | |__) | |  | |  | | | (___   \033[1;35m|\033[0m"
+    echo -e "\033[1;35m|   \033[1;36m|  ___/| |  | |  | |  ___/|  ___/| |  | |  | |  \___ \  \033[1;35m|\033[0m"
+    echo -e "\033[1;35m|   \033[1;36m| |    | |__| |__| | |    | |    | |__| |  | |  ____) | \033[1;35m|\033[0m"
+    echo -e "\033[1;35m|   \033[1;36m|_|     \____/ \____/|_|    |_|     \____/   |_| |_____/  \033[1;35m|\033[0m"
+    echo -e "\033[1;35m|                                                       |\033[0m"
+    echo -e "\033[1;35m|               \033[1;36mFUZZER created by Aexon\033[1;35m                 |\033[0m"
+    echo -e "\033[1;35m+-------------------------------------------------------+\033[0m"
+    echo
+    echo "Usage: $0 [-u <URL> | -l <url_list_file>] -w <payload_file> [-f status_code1,status_code2,...] [-p <proxy>] [-o <output_format>] [-h]"
+    echo
+    echo "Options:"
+    echo "  -u <URL>              The target URL with the 'FUZZ' parameter to be replaced by payloads."
+    echo "  -l <url_list_file>    The file containing a list of target URLs with the 'FUZZ' parameter."
+    echo "  -w <payload_file>     The file containing payloads, each on a new line."
+    echo "  -f <status_codes>     Comma-separated list of status codes to filter results."
+    echo "  -p <proxy>            Specify a proxy to use for the requests."
+    echo "  -o <output_format>    Specify the output format: original, json, html."
+    echo "  -h                    Display this help message and exit."
+    echo
+    exit 0
+}
+
+# Function to perform fuzzing on a URL
+perform_fuzzing() {
+    url="$1"
+    payload="$2"
+    filters="$3"
+    proxy="$4"
+    output_format="$5"
+    
+    # Replace FUZZ with the provided payload and curl the modified URL
+    modified_url=$(echo "$url" | sed "s/FUZZ/$payload/")
+    
+    # Perform curl request and capture details
+    response=$(curl $curl_options $proxy "$modified_url")
+    status_code=$(echo "$response" | tail -n1 | awk '{print $1}')
+    response_length=$(echo "$response" | tail -n1 | awk '{print $2}')
+    response_time=$(echo "$response" | tail -n1 | awk '{print $3}')
+    
+    # Check if the status code matches any of the filters, if provided
+    if [ -z "$filters" ] || [[ ",$filters," == *",$status_code,"* ]]; then
+        # Output the result based on the specified format
+        if [ "$output_format" == "json" ]; then
+            printf '{"payload":"%s","status_code":"%s","response_length":"%s","response_time":"%s","url":"%s"}\n' "$payload" "$status_code" "$response_length" "$response_time" "$modified_url"
+        elif [ "$output_format" == "html" ]; then
+            printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n" "$payload" "$status_code" "$response_length" "$response_time" "$modified_url"
+        else
+            printf "| %-15s | \033[0;32m%-15s\033[0m | \033[0;31m%-15s\033[0m | %-15s | %-15s |\n" "$payload" "$status_code" "$response_length" "$response_time" "$modified_url"
+        fi
+    fi
+}
+
+# Check if the script is run as root
+if [ "$(id -u)" -ne "0" ]; then
+    echo "Please run this script as root."
+    exit 1
+fi
+
+# Check if URL and payload file are provided as arguments
+if [ $# -lt 2 ]; then
+    display_help
+fi
+
+# Default values
+url=""
+url_list_file=""
+payload_file=""
+filters=""
+proxy=""
+output_format="original"
+
+# Parse arguments
+while getopts ":u:l:w:f:p:o:h" opt; do
+    case $opt in
+        u)
+            url="$OPTARG"
+            ;;
+        l)
+            url_list_file="$OPTARG"
+            ;;
+        w)
+            payload_file="$OPTARG"
+            ;;
+        f)
+            filters="$OPTARG"
+            ;;
+        p)
+            proxy="$OPTARG"
+            ;;
+        o)
+            output_format="$OPTARG"
+            ;;
+        h)
+            display_help
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+            exit 1
+            ;;
+        :)
+            echo "Option -$OPTARG requires an argument." >&2
+            exit 1
+            ;;
+    esac
+done
+
+# Check if URL or URL list and payload file are provided
+if [ -z "$url" ] && [ -z "$url_list_file" ] || [ -z "$payload_file" ]; then
+    display_help
+fi
+
+# If both -u and -l options are provided, display an error
+if [ -n "$url" ] && [ -n "$url_list_file" ]; then
+    echo "Please specify either a single URL (-u) or a list of URLs (-l), not both."
+    exit 1
+fi
+
+# If -u option is provided, use the single URL
+if [ -n "$url" ]; then
+    # Call the function with the provided URL, each payload, and the filters
+    mapfile -t payload_array < "$payload_file"
+    if [ "$output_format" == "html" ]; then
+        echo "<table>"
+        echo "<tr><th>Payload</th><th>Status Code</th><th>Response Size</th><th>Response Time</th><th>URL</th></tr>"
+    else
+        echo "+-----------------------------------------------------------------------------------------------------------------------------------------------------------------"
+        echo -e "\033[1;31m|    Payload     |   Status Code   |  Response Size  |  Response Time  |      URL        |\033[0m"
+        echo "+-----------------------------------------------------------------------------------------------------------------------------------------------------------------"
+    fi
+    for payload in "${payload_array[@]}"; do
+        perform_fuzzing "$url" "$payload" "$filters" "$proxy" "$output_format"
+    done
+    if [ "$output_format" == "html" ]; then
+        echo "</table>"
+    else
+        echo "+------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+    fi
+fi
+
+# If -l option is provided, read URLs from the file and perform fuzzing on each URL
+if [ -n "$url_list_file" ]; then
+    # Check if URL list file exists
+    if [ ! -f "$url_list_file" ]; then
+        echo "URL list file '$url_list_file' not found."
+        exit 1
+    fi
+
+    # Header
+    if [ "$output_format" == "html" ]; then
+        echo "<table>"
+        echo "<tr><th>Payload</th><th>Status Code</th><th>Response Size</th><th>Response Time</th><th>URL</th></tr>"
+    else
+        echo "+------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+        echo -e "\033[1;31m|    Payload     |   Status Code   |  Response Size  |  Response Time  |      URL        |\033[0m"
+        echo "+------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+    fi
+
+    # Call the function with the provided URLs, each payload, and the filters
+    while IFS= read -r url; do
+        # Skip empty or commented lines
+        if [[ -n "$url" && ! "$url" =~ ^#.* ]]; then
+            # Read payloads from the file into an array
+            mapfile -t payload_array < "$payload_file"
+
+            for payload in "${payload_array[@]}"; do
+                perform_fuzzing "$url" "$payload" "$filters" "$proxy" "$output_format"
+            done
+        fi
+    done < "$url_list_file"
+
+    # Footer
+    if [ "$output_format" == "html" ]; then
+        echo "</table>"
+    else
+        echo "+------------------------------------------------------------------------------------------------------------------------------------------------------------------\033[0m"
+    fi
+fi
