@@ -10,8 +10,7 @@ Key Features:
 - Payload Customization: Allows users to specify payloads in a separate file, each on a new line, enabling easy customization and expansion of the fuzzing process.
 - Filter Options: Provides the ability to filter results based on HTTP status codes, allowing users to focus on specific types of responses.
 - Proxy Support: Facilitates testing through a proxy server, enabling analysis in controlled environments.
-- Output Formats: Offers multiple output formats including original, JSON, and HTML, providing flexibility in result presentation and analysis.
-- Colorful Output: Utilizes ANSI escape sequences to present results with color-coded formatting, enhancing readability and interpretation of findings.
+- Output Formats: Offers multiple output formats including CLI Output, JSON, and HTML, providing flexibility in result presentation and analysis.
 
 Usage:
 1. Define Target: Specify the target URL with the 'FUZZ' parameter to be replaced by payloads using the `-u` option, or provide a file containing a list of target URLs with the `-l` option.
@@ -19,7 +18,8 @@ Usage:
 3. Filters: Optionally, filter results based on specific HTTP status codes using the `-f` option.
 4. Proxy Configuration: If necessary, specify a proxy server for requests using the `-p` option.
 5. Output Format: Choose the desired output format (original, JSON, or HTML) with the `-o` option.
-6. Run FUZZER: Execute the script to initiate the fuzzing process and analyze the results.
+6. Method Option: Using the `-m` can help to change the request method.
+7. Run FUZZER: Execute the script to initiate the fuzzing process and analyze the results.
 
 FUZZER empowers users with a powerful yet straightforward tool to enhance the security posture of web applications by efficiently identifying and addressing potential vulnerabilities.
 
