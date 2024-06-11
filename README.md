@@ -31,6 +31,20 @@ Run the command
 3. `chmod +x fuzzer`
 4. `mv -rvf fuzzer /usr/bin`
 
+# To get help 
+Run the command `sudo fuzzer` or `sudo fuzzer -h`
 
 # To use the tool
-Run the command `sudo fuzzer -u http://example.com -w wordlist`
+Run the command `sudo fuzzer -u http://example.com/FUZZ -w wordlist`
+
+# To find subdomains
+Run the command `sudo fuzzer -u FUZZ.example.com -w wordlist`
+
+# To set proxy 
+Run the command  `sudo fuzzer -u http://example.com/FUZZ -w wordlist -p 127.0.0.1:8080`
+
+# To set filter in Output
+Run the command `sudo fuzzer -u http://example.com/FUZZ -w wordlist -f 200,302`
+
+# To change the method 
+Run the command `sudo fuzzer -u http://example.com/FUZZ -w wordlist -m POST,TRACE`
