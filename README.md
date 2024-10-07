@@ -1,18 +1,18 @@
 # fuzzer
 Title: FUZZER - Web Fuzzing Tool
 
-Description:
+# Description:
 
 FUZZER is a versatile web fuzzing tool designed for security professionals and web developers to efficiently identify vulnerabilities and weaknesses in web applications. With its intuitive command-line interface, FUZZER enables users to automate the process of sending various payloads to target URLs and analyze the responses, helping uncover potential security flaws such as injection vulnerabilities, misconfigurations, and more.
 
-Key Features:
+# Key Features:
 - Flexible Input: Supports fuzzing a single URL or multiple URLs from a list.
 - Payload Customization: Allows users to specify payloads in a separate file, each on a new line, enabling easy customization and expansion of the fuzzing process.
 - Filter Options: Provides the ability to filter results based on HTTP status codes, allowing users to focus on specific types of responses.
 - Proxy Support: Facilitates testing through a proxy server, enabling analysis in controlled environments.
 - Output Formats: Offers multiple output formats including CLI Output, JSON, and HTML, providing flexibility in result presentation and analysis.
 
-Usage:
+# Usage:
 1. Define Target: Specify the target URL with the 'FUZZ' parameter to be replaced by payloads using the `-u` option, or provide a file containing a list of target URLs with the `-l` option.
 2. Payloads: Prepare a file containing payloads, each on a new line, using the `-w` option.
 3. Filters: Optionally, filter results based on specific HTTP status codes using the `-f` option.
